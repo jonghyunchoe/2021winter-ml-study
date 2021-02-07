@@ -1,8 +1,8 @@
-# 2021winter-machine-learning-study
+# 2021winter-ml-study
 
 ## ML Study
 * Time: Every Wednesday, Saturday 11 PM
-* Material: Kaggle lectures, 파이썬 머신러닝 완벽 가이드 (Machine Learning Definitive Guide, 권철민 저)
+* Material: Kaggle Online Courses, 파이썬 머신러닝 완벽 가이드 (Machine Learning Definitive Guide, 권철민 저)
 
 | **Date** |**Description**|
 |:--------:|:-----------:|
