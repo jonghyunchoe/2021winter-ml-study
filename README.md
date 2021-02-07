@@ -1,4 +1,4 @@
-# 2021winter-machine-learning-study
+# 2021winter-ml-study
 
 ## ML Study
 * Time: Every Wednesday, Saturday 11 PM
