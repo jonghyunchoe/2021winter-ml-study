@@ -1,38 +1,37 @@
 import pandas as pd 
+from sklearn.model_selection import train_test_split 
 
 # Read the data 
-data = pd.read_csv('../input/aer-credit-card-data/AER_credit_card_data.csv', true_values = ['yes'], false_values = ['no'])
+data = pd.read_csv('../input/melbounre-housing-snapshot/melb_data.csv')
 
-# Select target
-y = data.card
+# Select subset of predictors 
+cols_to_use = ['Rooms', 'Distance', 'Landsize', 'BuildingArea', 'YearBuilt']
+X = data[cols_to_use]
 
-# Select predictors 
-X = data.drop(['card'], axis=1)
+# Select target 
+y = data.Price 
 
-print("Number of rows in the dataset:", X.shape[0])
-X.head() 
+# Separate data into training and validation sets 
+X_train, X_valid, y_train, y_valid = train_test_split(X, y) 
 
-from sklearn.pipeline import make_pipeline 
-from sklearn.ensemble import RandomForestClassifier 
-from sklearn.model_selection import cross_val_score
+from xgboost import XGBRegressor 
 
-# Since there is no preprocessing, we don't need a pipeline (used anyway as best practice!)
-my_pipeline = make_pipeline(RandomForestClassifier(n_estimators=100))
-cv_scores = cross_val_score(my_pipeline, X, y, cv=5, scoring='accuray')
+my_model = XGBRegressor() 
+my_model.fit(X_train, y_train) 
 
-print("Cross-validation accuracy: %f" % cv_scores.mean())
+from sklearn.metrics import mean_absolute_error 
 
-expenditures_cardholders = X.expenditure[y] 
-expenditures_noncardholders = X.expenditure[~y]
+predictions = my_model.predict(X_valid) 
+print("Mean Absolute Error: " + str(mean_absolute_error(predictions, y_valid)))
 
-print("Fraction of those who did not receive a card and had no expenditures: %.2f" %((expenditures_noncardholders == 0).mean()))
-print("Fraction of those who received a card and had no expenditures: %.2f" % ((expenditures_cardholders == 0).mean())) 
+my_model = XGBRegressor(n_estimators=500)
+my_model.fit(X_train, y_train) 
 
-# Drop leaky predictors from dataset 
-potential_leaks = ['expenditure', 'share', 'active', 'majorcards']
-X2 = X.drop(potential_leaks, axis=1)
+my_model.fit(X_train, y_train, early_stopping_rounds=5, eval_set=[ (X_valid, y_valid)], verbose=False)
 
-# Evaluate the model with leaky predictors removed 
-cv_scores = cross_val_score(my_pipeline, X2, y, cv=5, scoring='accuracy')
+my_model = XGBRegressor(n_estimators=1000, learning_rate=0.05)
+my_model.fit(X_train, y_train, early_stopping_rounds=5, eval_set=[ (X_valid, y_valid)], verbose=False)
 
-print("Cross-val accuracy: %f" % cv_scores.mean()) 
+my_model = XGBRegressor(n_estimators=1000, learning_rate=0.05, n_jobs=4)
+my_model.fit(X_train, y_train, early_stopping_rounds=5, eval_set=[ (X_valid, y_valid) ], verbose=False)
+
